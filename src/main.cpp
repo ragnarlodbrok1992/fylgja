@@ -45,20 +45,23 @@ typedef struct {
 
 // Hexcube defines
 // Assumptions is here that hexcubes are flat topped (the one I really like)
-static int HEXCUBE_SIZE = 100;
+constexpr int HEXCUBE_SIZE = 20;
 
-// Hexmap - collection of hexcubes FIXME for now it's 2d
+// Hexmap - collection of hexcubes for now it's 2d TODO: creating 3d maps?
 static vec2_int HEXMAP_TOP_LEFT = {100, 100};
 
 // Hexcube declarations
 typedef struct {
   vec2_int pos; // Top-left hex is [0, 0]
-  vec2_int verts[6];
+  vec2_double verts[6];
 } Hexcube;
+
+// Static objects to test stuff
+static Hexcube test_hexcube;
 
 // Hexcube functions
 vec2_double flat_hex_corner(vec2_int center, int size, int i) {
-  int angle_degrees = 60 * i;
+  int angle_degrees = 60 * i; // Wraps around in 6 iterations, cuz degrees you know TODO add some asserts maybe
   double angle_radians = PI / 180 * static_cast<double>(angle_degrees);
   return {center.x + size * cos(angle_radians), center.y + size * sin(angle_radians)};
 }
@@ -66,6 +69,16 @@ vec2_double flat_hex_corner(vec2_int center, int size, int i) {
 void hexcube_populate_verts(Hexcube* hexcube) {
   // Function that takes pointer to hexcube and prepares it's vertices
   // Verts are calculated based on hex pos and top-left of hexmap
+  for (int i = 0; i < 6; i++) {
+    hexcube->verts[i] = flat_hex_corner(hexcube->pos, HEXCUBE_SIZE, i);
+  }
+}
+
+void print_hexcube_verts(Hexcube* hexcube) {
+  printf("print_hexcube_verts for hexcube --> %p\n", hexcube);
+  for (int i = 0; i < 6; i++) {
+    printf(" [%d] --> x: %f, y: %f\n", i, hexcube->verts[i].x, hexcube->verts[i].y);
+  }
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
@@ -80,6 +93,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
+
+  // Test code - testing static objects - hexcube
+  print_hexcube_verts(&test_hexcube);
+  hexcube_populate_verts(&test_hexcube);
+  print_hexcube_verts(&test_hexcube);
 
   return SDL_APP_CONTINUE;
 }
