@@ -31,6 +31,7 @@ echo Compiling...
   ../src/main.cpp^
   /I%SDL_HEADERS_INCLUDE_DIR%^
   %SDL_LIB_DIR%\SDL3.lib^
+  Opengl32.lib^
   /link /out:fylgja.exe
 
 popd

@@ -5,10 +5,12 @@
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include <SDL3/SDL_opengl.h>
 
 // Engine structures
-static SDL_Window *window = NULL;
-static SDL_Renderer *renderer = NULL;
+static SDL_Window* window = NULL;
+static SDL_Renderer* renderer = NULL;
+static SDL_GLContext context;
 
 constexpr const char* WINDOW_TITLE = "Fylgja - development phase version.";
 constexpr int WINDOW_WIDTH = 1280;
@@ -26,11 +28,36 @@ constexpr double PI = std::numbers::pi;
 // TODO - should we put it into appstate? It's passed around the callback functions
 static bool ENGINE_RUN = true;
 
+// Shaders for engine
+const char* vertexShader =
+R"()";
+
+const char* fragmentShader =
+R"()";
+
 // Some color defines
 static SDL_Color BACKGROUND = {0x27, 0x2a, 0x2e, 0xff};
 static SDL_Color WHITE = {0xff, 0xff, 0xff, 0xff};
 static SDL_Color MISSING_TEXTURE_PURPLE = {0xff, 0x00, 0xdc, 0xff};
 static SDL_Color HEX_CUBE_BORDER = {0xb3, 0x8b, 0x79, 0xff};
+
+typedef struct {
+  GLclampf r;
+  GLclampf g;
+  GLclampf b;
+  GLclampf a;
+} ogl_color;
+
+constexpr float uint8_to_float(uint8_t value) {
+  return static_cast<float>(value) / 0xff;
+}
+
+static ogl_color GL_BACKGROUND = {
+  .r = uint8_to_float(0x27),
+  .g = uint8_to_float(0x2a),
+  .b = uint8_to_float(0x2e),
+  .a = uint8_to_float(0xff)
+};
 
 // Linear algebra primitives
 typedef struct {
@@ -81,6 +108,7 @@ void print_hexcube_verts(Hexcube* hexcube) {
   }
 }
 
+// TODO remove - old 2d api
 void render_hexcube(Hexcube* hexcube, SDL_Color color) {
   SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 
@@ -106,10 +134,30 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     return SDL_APP_FAILURE;
   }
 
-  if (!SDL_CreateWindowAndRenderer(WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer)) {
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+  if (!SDL_CreateWindowAndRenderer(WINDOW_TITLE,
+        WINDOW_WIDTH, WINDOW_HEIGHT,
+        SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS,
+        &window, &renderer)) {
     SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
+
+  context = SDL_GL_CreateContext(window);
+  if (!context) {
+    SDL_Log("OpenGL context could not be created! SDL_Error: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
+
+  if (!SDL_GL_MakeCurrent(window, context)) {
+    SDL_Log("SDL_GL_MakeCurrent failed: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
+
+  SDL_GL_SetSwapInterval(1);
 
   // Test code - testing static objects - hexcube
   test_hexcube.pos = HEXMAP_TOP_LEFT;
@@ -149,14 +197,12 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   // Check for ENGINE_RUN
   if (!ENGINE_RUN) return SDL_APP_SUCCESS;
 
-  // Frame draw here
-  SDL_SetRenderDrawColor(renderer, BACKGROUND.r, BACKGROUND.g, BACKGROUND.b, BACKGROUND.a);
-  SDL_RenderClear(renderer);
+  glClearColor(GL_BACKGROUND.r, GL_BACKGROUND.g, GL_BACKGROUND.b, GL_BACKGROUND.a);
+  glClear(GL_COLOR_BUFFER_BIT);
 
-  // Rendering here
-  render_hexcube(&test_hexcube, HEX_CUBE_BORDER);
+  // Rendering goes here
 
-  SDL_RenderPresent(renderer);
+  SDL_GL_SwapWindow(window);
 
   return SDL_APP_CONTINUE;
 }
