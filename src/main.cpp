@@ -30,7 +30,7 @@ static bool ENGINE_RUN = true;
 static SDL_Color BACKGROUND = {0x27, 0x2a, 0x2e, 0xff};
 static SDL_Color WHITE = {0xff, 0xff, 0xff, 0xff};
 static SDL_Color MISSING_TEXTURE_PURPLE = {0xff, 0x00, 0xdc, 0xff};
-static SDL_Color HEX_CUBE_BORDER = {0x52, 0x1b, 0x04, 0xff};
+static SDL_Color HEX_CUBE_BORDER = {0xb3, 0x8b, 0x79, 0xff};
 
 // Linear algebra primitives
 typedef struct {
@@ -81,6 +81,23 @@ void print_hexcube_verts(Hexcube* hexcube) {
   }
 }
 
+void render_hexcube(Hexcube* hexcube, SDL_Color color) {
+  SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+
+  for (int i = 0; i < 5; i++) {
+    SDL_RenderLine(renderer,
+        (float)hexcube->verts[i].x,
+        (float)hexcube->verts[i].y,
+        (float)hexcube->verts[i + 1].x,
+        (float)hexcube->verts[i + 1].y);
+  }
+  SDL_RenderLine(renderer,
+      (float)hexcube->verts[0].x,
+      (float)hexcube->verts[0].y,
+      (float)hexcube->verts[5].x,
+      (float)hexcube->verts[5].y);
+}
+
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   SDL_SetAppMetadata(APP_NAME, APP_VERSION, APP_IDENTIFIER);
 
@@ -95,6 +112,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   }
 
   // Test code - testing static objects - hexcube
+  test_hexcube.pos = HEXMAP_TOP_LEFT;
   print_hexcube_verts(&test_hexcube);
   hexcube_populate_verts(&test_hexcube);
   print_hexcube_verts(&test_hexcube);
@@ -136,6 +154,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   SDL_RenderClear(renderer);
 
   // Rendering here
+  render_hexcube(&test_hexcube, HEX_CUBE_BORDER);
 
   SDL_RenderPresent(renderer);
 
