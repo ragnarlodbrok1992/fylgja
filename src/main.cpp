@@ -2,10 +2,14 @@
 #include <numbers>
 #include <cmath>
 
+// OpenGL headers
+#include <glad/glad.h>
+
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_opengl.h>
+
 
 // Engine structures
 static SDL_Window* window = NULL;
@@ -30,10 +34,49 @@ static bool ENGINE_RUN = true;
 
 // Shaders for engine
 const char* vertexShader =
-R"()";
+R"(
+#version 330 core
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aColor;
+
+out vec3 ourColor;
+
+void main() {
+  gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+  ourColor = aColor;
+}
+)";
 
 const char* fragmentShader =
-R"()";
+R"(
+#version 330 core
+
+in vec3 ourColor;
+out vec4 FragColor;
+
+void main() {
+  FragColor = vec4(ourColor, 1.0f);
+}
+)";
+
+// OpenGL shader functions
+GLuint compileShader(GLenum type, const char* source) {
+  GLuint shader = glCreateShader(type);
+
+  glShaderSource(shader, 1, &source, NULL);
+  glCompileShader(shader);
+
+  GLint success;
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    char infoLog[512];
+    glGetShaderInfoLog(shader, 512, NULL, infoLog);
+    SDL_Log("Shader compilation failed: %s", infoLog);
+  }
+
+  return shader;
+}
+
 
 // Some color defines
 static SDL_Color BACKGROUND = {0x27, 0x2a, 0x2e, 0xff};
