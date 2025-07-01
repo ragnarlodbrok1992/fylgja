@@ -27,17 +27,16 @@ xcopy "%SDL_DLL_PATH%" "." /y
 
 echo Compiling...
 
-echo Main binary compilation...
+echo Compilation of shader binary...
 %COMPILER% /EHsc /Zi^
   /DEBUG:FULL^
   /INCREMENT:NO^
   /std:c++20^
-  ../src/main.cpp^
-  %GLAD_SRC_DIR%\glad.c^
+  ../src/rendering/shaders/loading_shaders.cpp^
   /I%SDL_HEADERS_INCLUDE_DIR%^
   /I%GLAD_HEADERS_INCLUDE_DIR%^
   %SDL_LIB_DIR%\SDL3.lib^
   Opengl32.lib^
-  /link /out:fylgja.exe
+  /link /out:shader_lib.exe
 
 popd

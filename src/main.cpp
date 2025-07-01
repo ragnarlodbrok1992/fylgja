@@ -10,6 +10,9 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_opengl.h>
 
+// Local imports
+#include "rendering/shaders/loading_shaders.hpp"
+
 
 // Engine structures
 static SDL_Window* window = NULL;
