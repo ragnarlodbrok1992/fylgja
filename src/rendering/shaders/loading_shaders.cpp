@@ -2,7 +2,6 @@
 
 #include <SDL3/SDL_filesystem.h>
 
-
 // Test main
 // Paths relative to the binary location 
 static const char* vert_shader_path = "../src/assets/shaders/vert_shader.glsl";
@@ -29,6 +28,48 @@ void load_shader_code(char* shader, std::filesystem::path shader_file_path) {
   SDL_Log("Shader code loaded successfully from: %s", shader_file_path.string().c_str());
 }
 
+GLuint compileShader(GLenum type, const char* source) {
+  GLuint shader = glCreateShader(type);
+
+  glShaderSource(shader, 1, &source, NULL);
+  glCompileShader(shader);
+
+  GLint success;
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    char infoLog[512];
+    glGetShaderInfoLog(shader, 512, NULL, infoLog);
+    SDL_Log("Shader compilation failed: %s", infoLog);
+  }
+
+  return shader;
+}
+
+GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource) {
+  GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource);
+  GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
+
+  GLuint shaderProgram = glCreateProgram();
+  glAttachShader(shaderProgram, vertexShader);
+  glAttachShader(shaderProgram, fragmentShader);
+  glLinkProgram(shaderProgram);
+
+  GLint success;
+  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+  if (!success) {
+    char infoLog[512];
+    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+    SDL_Log("Shader program linking failed: %s", infoLog);
+  }
+
+  glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
+
+  return shaderProgram;
+}
+
+// TEST CODE
+// -------------------------
 int main() {
   // Log absolute path to the source code directory at the time of compilation
   // Using __FILE__ to get the current file path

@@ -33,6 +33,7 @@ echo Compilation of shader binary...
   /INCREMENT:NO^
   /std:c++20^
   ../src/rendering/shaders/loading_shaders.cpp^
+  %GLAD_SRC_DIR%\glad.c^
   /I%SDL_HEADERS_INCLUDE_DIR%^
   /I%GLAD_HEADERS_INCLUDE_DIR%^
   %SDL_LIB_DIR%\SDL3.lib^
