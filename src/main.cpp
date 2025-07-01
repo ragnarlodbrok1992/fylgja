@@ -16,6 +16,9 @@ static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
 static SDL_GLContext context;
 
+// OpenGL stuff
+static GLuint shaderProgram;
+
 constexpr const char* WINDOW_TITLE = "Fylgja - development phase version.";
 constexpr int WINDOW_WIDTH = 1280;
 constexpr int WINDOW_HEIGHT = 768;
@@ -47,6 +50,56 @@ void main() {
 }
 )";
 
+// Test entity - hello world triangle
+struct TestEntity {
+  GLfloat vertices[3 * 6] = { // Three vertices, each with 3 components (x, y, z) and 3 color components (r, g, b)
+    // Positions          // Colors
+    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // Bottom left
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, // Bottom right
+     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f  // Top
+  };
+  GLuint VBO, VAO; // Vertex Buffer Object and Vertex Array Object
+  
+  void prepare() {
+    // Generate and bind the Vertex Array Object
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // Generate and bind the Vertex Buffer Object
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+
+    // Unbind the VAO (not the EBO) to avoid accidentally modifying it
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+  }
+
+  void render() {
+    // Bind the VAO and draw the triangle
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0); // Unbind the VAO
+  }
+
+  void teardown() {
+    // Delete the VBO and VAO
+    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO);
+  }
+};
+
+// Static test entity
+static TestEntity testEntity;
+
 const char* fragmentShader =
 R"(
 #version 330 core
@@ -75,6 +128,29 @@ GLuint compileShader(GLenum type, const char* source) {
   }
 
   return shader;
+}
+
+GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource) {
+  GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource);
+  GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
+
+  GLuint shaderProgram = glCreateProgram();
+  glAttachShader(shaderProgram, vertexShader);
+  glAttachShader(shaderProgram, fragmentShader);
+  glLinkProgram(shaderProgram);
+
+  GLint success;
+  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+  if (!success) {
+    char infoLog[512];
+    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+    SDL_Log("Shader program linking failed: %s", infoLog);
+  }
+
+  glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
+
+  return shaderProgram;
 }
 
 
@@ -200,13 +276,27 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     return SDL_APP_FAILURE;
   }
 
+  // Initialize GLAD
+  if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+    SDL_Log("Failed to initialize GLAD");
+    return SDL_APP_FAILURE;
+  }
+
   SDL_GL_SetSwapInterval(1);
 
   // Test code - testing static objects - hexcube
-  test_hexcube.pos = HEXMAP_TOP_LEFT;
-  print_hexcube_verts(&test_hexcube);
-  hexcube_populate_verts(&test_hexcube);
-  print_hexcube_verts(&test_hexcube);
+  // test_hexcube.pos = HEXMAP_TOP_LEFT;
+  // print_hexcube_verts(&test_hexcube);
+  // hexcube_populate_verts(&test_hexcube);
+  // print_hexcube_verts(&test_hexcube);
+  
+  // Create shader program and prepare test entity
+  shaderProgram = createShaderProgram(vertexShader, fragmentShader);
+  if (shaderProgram == 0) {
+    SDL_Log("Failed to create shader program");
+    return SDL_APP_FAILURE;
+  }
+  testEntity.prepare();
 
   return SDL_APP_CONTINUE;
 }
@@ -244,6 +334,8 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glClear(GL_COLOR_BUFFER_BIT);
 
   // Rendering goes here
+  glUseProgram(shaderProgram);
+  testEntity.render();
 
   SDL_GL_SwapWindow(window);
 
@@ -252,4 +344,6 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 
 // Teardown stuff goes here
 void SDL_AppQuit(void *appstate, SDL_AppResult result) {
+  // Cleanup Test Entity
+  testEntity.teardown();
 }
