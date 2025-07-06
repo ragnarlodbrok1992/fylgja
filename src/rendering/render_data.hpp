@@ -7,6 +7,7 @@ struct RenderData {
   GLfloat* vertices; // Array of vertices plus colors
   GLuint VBO;         // Vertex Buffer Object
   GLuint VAO;         // Vertex Array Object
+  GLuint shader_program; // Shader program ID
   void prepare();
   void render();
   void teardown();

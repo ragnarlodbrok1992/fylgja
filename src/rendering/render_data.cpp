@@ -1,9 +1,14 @@
 #include "render_data.hpp"
 
+#include <stdio.h>
+
 void RenderData::prepare() {
     // Generate and bind the Vertex Array Object
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
+
+    // DEBUG prints
+    printf("Sizeof vertices: %zu\n", sizeof(vertices));
 
     // Generate and bind the Vertex Buffer Object
     glGenBuffers(1, &VBO);
@@ -25,6 +30,7 @@ void RenderData::prepare() {
 
 void RenderData::render() {
     // Bind the VAO and draw the triangle
+    glUseProgram(shader_program);
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0); // Unbind the VAO

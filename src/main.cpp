@@ -85,12 +85,27 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
   // Loading shaders - default one
   shader_program = initializeShaderProgram(
-      "../src/assets/shaders/vert_shader.glsl",
-      "../src/assets/shaders/frag_shader.glsl"
+      "src/assets/shaders/vert_shader.glsl",
+      "src/assets/shaders/frag_shader.glsl"
   );
 
   // Prepare the test triangle
   test_triangle.prepare();
+  test_triangle.render_data.shader_program = shader_program;
+
+  // Print out triangle vertices
+  // printf("Triangle vertices:\n");
+  // for (int i = 0; i < 3; i++) {
+  //   printf(" [%d] --> x: %f, y: %f, z:%f, r: %f, g: %f, b: %f\n", 
+  //          i, 
+  //          test_triangle.render_data.vertices[i * 6 + 0], // x
+  //          test_triangle.render_data.vertices[i * 6 + 1], // y
+  //          test_triangle.render_data.vertices[i * 6 + 2], // z 
+  //          test_triangle.render_data.vertices[i * 6 + 3], // r
+  //          test_triangle.render_data.vertices[i * 6 + 4], // g
+  //          test_triangle.render_data.vertices[i * 6 + 5]  // b
+  //   );
+  // }
 
   return SDL_APP_CONTINUE;
 }
