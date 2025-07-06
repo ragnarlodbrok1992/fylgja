@@ -33,6 +33,9 @@ echo Main binary compilation...
   /INCREMENT:NO^
   /std:c++20^
   ../src/main.cpp^
+  ../src/entities/tutorial_triangle.cpp^
+  ../src/rendering/render_data.cpp^
+  ../src/rendering/shaders/loading_shaders.cpp^
   %GLAD_SRC_DIR%\glad.c^
   /I%SDL_HEADERS_INCLUDE_DIR%^
   /I%GLAD_HEADERS_INCLUDE_DIR%^

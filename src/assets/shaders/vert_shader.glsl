@@ -5,7 +5,7 @@ layout(location = 0) in vec3 aPos; // Vertex position
 layout(location = 1) in vec3 aColor; // Vertex color
 
 // Output to fragment shader
-out ve3 color;
+out vec3 color;
 
 // Uniform - MVP matrix
 uniform mat4 uMVPMatrix;

@@ -1,7 +1,6 @@
 #include "render_data.hpp"
 
-// TODO: We are not taking into account the size of the vertices array here which is dynamic
-RenderData::prepare() {
+void RenderData::prepare() {
     // Generate and bind the Vertex Array Object
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -23,13 +22,15 @@ RenderData::prepare() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
-RenderData::render() {
+
+void RenderData::render() {
     // Bind the VAO and draw the triangle
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0); // Unbind the VAO
 }
-RenderData::teardown() {
+
+void RenderData::teardown() {
     // Delete the VBO and VAO
     glDeleteBuffers(1, &VBO);
     glDeleteVertexArrays(1, &VAO);

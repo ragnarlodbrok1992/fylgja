@@ -2,3 +2,4 @@ tags
 build/
 src/external/
 
+*.rdbg

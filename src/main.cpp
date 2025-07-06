@@ -11,12 +11,14 @@
 
 // Local imports
 #include "rendering/render_defaults.hpp"
+#include "rendering/shaders/loading_shaders.hpp"
 #include "entities/tutorial_triangle.hpp"
 
 // Engine structures
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
 static SDL_GLContext context;
+static GLuint shader_program;
 
 // Engine constants
 constexpr const char* WINDOW_TITLE = "Fylgja - development phase version.";
@@ -80,6 +82,12 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   }
 
   SDL_GL_SetSwapInterval(1);
+
+  // Loading shaders - default one
+  shader_program = initializeShaderProgram(
+      "../src/assets/shaders/vert_shader.glsl",
+      "../src/assets/shaders/frag_shader.glsl"
+  );
 
   // Prepare the test triangle
   test_triangle.prepare();

@@ -68,9 +68,19 @@ GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource)
   return shaderProgram;
 }
 
+GLuint initializeShaderProgram(std::filesystem::path vertex_shader_path, std::filesystem::path fragment_shader_path) {
+    char vertex_shader_code[4096]; // Adjust size as needed
+    char fragment_shader_code[4096]; // Adjust size as needed
+
+    load_shader_code(vertex_shader_code, vertex_shader_path);
+    load_shader_code(fragment_shader_code, fragment_shader_path);
+
+    return createShaderProgram(vertex_shader_code, fragment_shader_code);
+}
+
 // TEST CODE
 // -------------------------
-int main() {
+int test_main() {
   // Log absolute path to the source code directory at the time of compilation
   // Using __FILE__ to get the current file path
   const char* source_code_dir = __FILE__;
