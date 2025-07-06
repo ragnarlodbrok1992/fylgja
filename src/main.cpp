@@ -11,6 +11,7 @@
 
 // Local imports
 #include "rendering/render_defaults.hpp"
+#include "entities/tutorial_triangle.hpp"
 
 // Engine structures
 static SDL_Window* window = NULL;
@@ -38,6 +39,8 @@ static SDL_Color WHITE = {0xff, 0xff, 0xff, 0xff};
 static SDL_Color MISSING_TEXTURE_PURPLE = {0xff, 0x00, 0xdc, 0xff};
 static SDL_Color HEX_CUBE_BORDER = {0xb3, 0x8b, 0x79, 0xff};
 
+// Test objects
+static TutorialTriangle test_triangle;
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   SDL_SetAppMetadata(APP_NAME, APP_VERSION, APP_IDENTIFIER);
@@ -78,6 +81,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
   SDL_GL_SetSwapInterval(1);
 
+  // Prepare the test triangle
+  test_triangle.prepare();
+
   return SDL_APP_CONTINUE;
 }
 
@@ -114,7 +120,9 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glClear(GL_COLOR_BUFFER_BIT);
 
   // Rendering goes here
+  test_triangle.render();
 
+  // Final swap
   SDL_GL_SwapWindow(window);
 
   return SDL_APP_CONTINUE;
@@ -122,4 +130,14 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 
 // Teardown stuff goes here
 void SDL_AppQuit(void *appstate, SDL_AppResult result) {
+
+  // Teadown the test triangle
+  test_triangle.teardown();
+
+  // Destroy the OpenGL context
+  SDL_GL_DestroyContext(context);
+
+  // Destroy the window and renderer
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
 }
