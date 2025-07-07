@@ -9,6 +9,7 @@ GLfloat triangle_vertices[] = {
 
 void TutorialTriangle::prepare() {
     render_data.vertices = triangle_vertices;
+    render_data.vertex_count = 3;
     render_data.prepare();
 }
 

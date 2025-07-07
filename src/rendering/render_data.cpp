@@ -7,13 +7,10 @@ void RenderData::prepare() {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    // DEBUG prints
-    printf("Sizeof vertices: %zu\n", sizeof(vertices));
-
     // Generate and bind the Vertex Buffer Object
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertex_count * 6 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
     // Position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
@@ -32,7 +29,7 @@ void RenderData::render() {
     // Bind the VAO and draw the triangle
     glUseProgram(shader_program);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, vertex_count);
     glBindVertexArray(0); // Unbind the VAO
 }
 
